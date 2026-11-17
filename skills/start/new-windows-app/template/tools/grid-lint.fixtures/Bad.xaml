@@ -1,0 +1,8 @@
+<!-- Fixture for tools\grid-lint.ps1: 4 lines off the grid. -->
+<StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Border Margin="10,8,8,8" />
+  <StackPanel Spacing="6" />
+  <Border CornerRadius="5" />
+  <TextBlock Canvas.Left="3" />
+  <Grid Width="*" Height="Auto" />
+</StackPanel>

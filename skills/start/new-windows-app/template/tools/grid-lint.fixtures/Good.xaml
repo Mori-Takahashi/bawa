@@ -1,0 +1,8 @@
+<!-- Fixture for tools\grid-lint.ps1: nothing off the grid. -->
+<StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Border Margin="{StaticResource PageMargin}" />
+  <StackPanel Spacing="8" />
+  <Border Padding="12,8" BorderThickness="1" />
+  <FontIcon Width="13" /> <!-- grid: ok icon glyph box -->
+  <Grid.RowDefinitions><RowDefinition Height="2*" /><RowDefinition Height="48" /></Grid.RowDefinitions>
+</StackPanel>
