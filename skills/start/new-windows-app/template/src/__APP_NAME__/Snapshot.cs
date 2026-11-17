@@ -58,6 +58,7 @@ public static partial class Snapshot
         ShowWindow(window.Hwnd, SwRestore);
         SetForegroundWindow(window.Hwnd);
         window.Activate();
+        window.FocusQuietly();
         await Task.Delay(800);
         try
         {

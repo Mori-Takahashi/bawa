@@ -23,6 +23,7 @@ public sealed partial class MainWindow : Window
         // Mica on Windows 11. Windows 10 keeps the default background.
         if (MicaController.IsSupported()) SystemBackdrop = new MicaBackdrop();
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 720));
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "AppIcon.ico"));
 
         var settings = CommandUi.Accelerator(AppCommands.Settings);
         settings.Invoked += (_, e) => { ShowSettings(SettingsSection.Appearance); e.Handled = true; };
@@ -31,6 +32,16 @@ public sealed partial class MainWindow : Window
         App.Theme.Changed += ApplyTheme;
         ApplyTheme();
         ShowPage(SidebarPage.All);
+        Root.Loaded += (_, _) => FocusQuietly();
+    }
+
+    /// <summary>
+    /// Windows open calm: focus goes to the selected navigation item as if clicked,
+    /// so arrow keys work at once and no focus ring shows until someone presses Tab.
+    /// </summary>
+    public void FocusQuietly()
+    {
+        if (Nav.SelectedItem is Control item) item.Focus(FocusState.Pointer);
     }
 
     public FrameworkElement RootElement => Root;

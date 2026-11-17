@@ -8,8 +8,10 @@
     </Grid.RowDefinitions>
     <!-- The title bar: the app's own content, dragged like the system one. -->
     <Grid x:Name="TitleBarArea" Grid.Row="0">
-      <TextBlock x:Name="TitleText" Margin="16,0,0,0" VerticalAlignment="Center"
-                 Style="{StaticResource CaptionTextBlockStyle}" />
+      <StackPanel Margin="16,0,0,0" Orientation="Horizontal" Spacing="{StaticResource SpaceMd}" VerticalAlignment="Center">
+        <Image Source="ms-appx:///AppIcon.ico" Width="16" Height="16" />
+        <TextBlock x:Name="TitleText" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+      </StackPanel>
     </Grid>
     <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed"
                     PaneDisplayMode="Left" IsSettingsVisible="True"
