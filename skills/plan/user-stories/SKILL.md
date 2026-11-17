@@ -1,6 +1,6 @@
 ---
 name: user-stories
-description: Prioritized backlog of user stories with checkable acceptance criteria (docs/STORIES.md) for a macOS app, built from a brief, research, or screen index. Use after app-brief or clone, or when the user asks for user stories, a backlog, a feature list, or "what do we build first".
+description: Prioritized backlog of user stories with checkable acceptance criteria (docs/STORIES.md) for a Windows app, built from a brief, research, or screen index. Use after app-brief or clone, or when the user asks for user stories, a backlog, a feature list, or "what do we build first".
 ---
 
 # User stories
@@ -15,27 +15,29 @@ where they exist. Write `docs/STORIES.md`.
 
 ```markdown
 ### S-012 Complete a task with the keyboard
-As the user, I select a task and press Command-Return to complete it.
+As the user, I select a task and press Ctrl+Enter to complete it.
 Screens: 01-inbox.png, 02-today.png
 Depends: S-004
 Acceptance:
-- [snap] The circle fills and the row fades out within half a second.
-- [self] An "Undo" banner shows for five seconds; Command-Z also undoes it.
+- [snap] The circle fills and the row leaves the list.
+- [self] An InfoBar "Task completed [Undo]" shows; Ctrl+Z also undoes it.
 - [unit] A recurring task moves to its next date.
+- [ui] Ctrl+Enter on the selected row completes it (ui-check.cs).
 Status: todo
 ```
 
 - One action per story. "Rename a project from its context menu", not
   "Manage projects".
 - Every acceptance line starts with how it is checked: `[snap]` snapshot,
-  `[unit]` unit test, `[self]` self-test, `[manual]` a person must try it.
+  `[unit]` unit test, `[self]` self-test, `[ui]` UI Automation from outside
+  (`test-windows-app`), `[manual]` a person must try it.
   "Works well" is not checkable.
 - `Screens:` links reference screenshots, so `improve-loop` knows what to
   compare. Without a reference app, name the snapshot pages that will show
-  the story. A panel, sheet, or menu needs its own snapshot page.
+  the story. A dialog, flyout, or panel needs its own snapshot capture.
 - `Depends:` (optional) lists stories that must be done first.
 - Keep a control and the only surface that shows it in one story: a
-  highlighting field that lives only in the quick-add panel ships with the
+  highlighting box that lives only in the quick-add panel ships with the
   panel.
 - Status: `todo`, `doing`, `done`, or `dropped`.
 
@@ -45,11 +47,12 @@ Each milestone ends with an app the user can use for a day.
 
 1. **M1 Core loop**: the one thing the app is for, end to end. Data
    survives a restart.
-2. **M2 Organize**: the main structure, sidebar pages, moving items.
+2. **M2 Organize**: the main structure, navigation pages, moving items.
 3. **M3 Time**: dates, Today and Upcoming, recurrence, reminders.
-4. **M4 Speed**: quick-add panel, global shortcut, natural language input,
-   keyboard navigation, search, menu commands.
-5. **M5 System**: menu bar, Share menu, Shortcuts, notifications, CLI.
+4. **M4 Speed**: quick-add panel, global hotkey, natural language input,
+   keyboard navigation, search, command bar and shortcuts.
+5. **M5 System**: tray icon, Explorer integration, notifications, start
+   with Windows, CLI.
 6. **M6 Polish**: drag and drop, context menus, empty states, icon, settings.
 
 Rename milestones to fit the app. Inside a milestone, stories that others

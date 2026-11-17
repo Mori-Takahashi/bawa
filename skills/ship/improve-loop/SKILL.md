@@ -1,6 +1,6 @@
 ---
 name: improve-loop
-description: Autonomous loop that works through docs/STORIES.md one story at a time for a macOS app, building, snapshotting, comparing against reference screenshots, fixing, and committing, until a milestone is done. Use when the user says "keep going", "work through the backlog", "make it match the reference", or wants an unattended improvement loop.
+description: Autonomous loop that works through docs/STORIES.md one story at a time for a Windows app, building, snapshotting, comparing against reference screenshots, fixing, and committing, until a milestone is done. Use when the user says "keep going", "work through the backlog", "make it match the reference", or wants an unattended improvement loop.
 argument-hint: "[milestone, e.g. M1]"
 ---
 
@@ -9,7 +9,7 @@ argument-hint: "[milestone, e.g. M1]"
 One pass through the loop takes one story from `todo` to `done`:
 
 ```text
-pick story -> plan -> code -> ./build.sh -> snapshot -> compare -> fix -> commit -> update STORIES.md
+pick story -> plan -> code -> build.ps1 -> snapshot -> compare -> fix -> commit -> update STORIES.md
 ```
 
 Stop after the milestone the user named, or after the current milestone if
@@ -26,22 +26,26 @@ If the story adds a screen, an action, or words and has no `UX:` block
 yet, call the Skill tool with `ux-design` first.
 
 Write two to five lines in your head or in the commit body: which files
-change, which model fields are new, which menu command and shortcut it adds,
-which snapshot page shows it. If the story needs a new SwiftData field, give
-it a default value so existing databases keep loading.
+change, which data fields are new, which `AppCommands` entry and shortcut
+it adds, which snapshot page shows it. A new database column is a new
+entry at the end of `Migrations` in `ItemStore` with a `DEFAULT`, so
+existing databases keep loading.
 
 ## 3. Code
 
-Follow the `swift-swiftui` and `mac-design` skills, the story's `UX:`
-block, and `design/DESIGN-SYSTEM.md` if the app has one. System hooks follow
-`os-integrations`. Keep each view file under about 300 lines.
-Put new pages in the `SidebarItem` enum so snapshot mode visits them.
+Follow the `csharp-winui` and `windows-design` skills, the story's `UX:`
+block, and `design/DESIGN-SYSTEM.md` if the app has one. Keep each page
+file (XAML plus code) under about 300 lines. Put new pages in the
+`SidebarPage` enum and new Settings sections in `SettingsSection`, so
+snapshot mode visits them. Long work runs off the UI thread with progress
+and Cancel (`csharp-winui`, "The UI thread").
 
 ## 4. Build and snapshot
 
 Follow the `build-and-verify` skill. If the story has logic, add a test
-or a self-test step (`test-mac-app` skill). Use seed data (`APP_SEED=1`) so pages
-show real content.
+or a self-test step (`test-windows-app` skill); a `[ui]` acceptance line
+gets a check in `tools\ui-check.cs`. Grow the seed data
+(`Data\SeedData.cs`) so pages show real content.
 
 ## 5. Compare
 
@@ -57,16 +61,16 @@ the Read tool. Write down the differences that matter, in this order:
 5. Spacing and alignment.
 6. Color and details.
 
-The goal is the same structure and behavior, built from Apple's own controls.
-It is not a pixel copy. When the reference uses a web-style custom control
-and macOS has a native one (a toolbar, a sidebar, a context menu, a date
-picker), use the native one.
+The goal is the same structure and behavior, built from WinUI's own
+controls. It is not a pixel copy. When the reference uses a web-style
+custom control and WinUI has a native one (a command bar, a navigation
+pane, a context menu, a date picker), use the native one.
 
 No reference screenshot (no app was cloned)? Compare against the story's
-acceptance lines and the `mac-design` rules instead.
+acceptance lines and the `windows-design` rules instead.
 
-Snapshot only the pages a story touches (`APP_SNAPSHOT_PAGES`), and the
-full set at the end of each milestone.
+Snapshot only the pages a story touches (`tools\snap.ps1 -Pages <ids>`),
+and the full set at the end of each milestone.
 
 Fix, rebuild, and compare again. Three rounds per story at most. If it still
 does not match, set the story to `todo` again with a note that says what is
@@ -76,7 +80,7 @@ blocking, and move on.
 
 ```bash
 git add -A
-git commit -m "Complete tasks with Command-Return"
+git commit -m "Complete tasks with Ctrl+Enter"
 ```
 
 Set the story to `done` in `docs/STORIES.md` and commit that with the code.
@@ -93,14 +97,17 @@ At the end of the loop, report to the user:
 - Anything the user should try by hand (shortcuts, drag and drop).
 - The next story in line.
 
-Then `./build.sh --open` so the user can try the new build.
+Then `powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1 -Open`
+so the user can try the new build.
 
 ## Milestone check-in
 
-When the last story of a milestone is `done`, call the Skill tool with
-`improve-architecture` before you start the next milestone. Unattended, do
-its top recommendation only if it is `Strong`, and leave the rest in the
-review file for the user.
+When the last story of a milestone is `done`, run the full checks
+(`dotnet test`, `tools\selftest.ps1`, `tools\snap.ps1`, both grid checks)
+and read every snapshot before you start the next milestone. The
+`improve-architecture` skill for this check-in is not ported to Windows
+yet; until then, note files over 300 lines and duplicated logic in the
+report.
 
 When a story fixes a bug, add an entry to `docs/FIXLOG.md`: symptom,
 cause, fix, and a last line `Rule: <what to always or never do>`. The fix
