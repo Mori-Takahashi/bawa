@@ -243,6 +243,15 @@ Der genaue Umfang entsteht im `app-brief` mit dem Nutzer. Feste Leitplanken:
 - Banner-Bilder: Die alten BAMA-Banner fliegen raus. Die README startet mit
   einem Textkopf, bis es neue gibt.
 
-## Offen beim Nutzer
+## Autor und Herkunft (vom Nutzer entschieden)
 
-- Autorname in `plugin.json` und `marketplace.json`.
+- `plugin.json` und `marketplace.json`: Autor und Owner sind
+  `Lyonel Berzen`, URL `https://github.com/Mori-Takahashi`.
+- Das Original muss sichtbar bleiben:
+  - Die README sagt gleich unter dem Kopf: "Based on
+    [BAMA](https://github.com/daveebbelaar/bama) by Dave Ebbelaar" und hat
+    einen Abschnitt "Credits" am Ende.
+  - `LICENSE` behält "Copyright (c) 2026 Dave Ebbelaar" und bekommt
+    darunter "Copyright (c) 2026 Lyonel Berzen".
+  - Die `description` in `plugin.json` und `marketplace.json` endet mit
+    "Based on BAMA by Dave Ebbelaar."
