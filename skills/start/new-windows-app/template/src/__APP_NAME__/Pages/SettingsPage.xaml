@@ -1,17 +1,18 @@
 <Page x:Class="__APP_NAME__.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Grid>
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="using:__APP_NAME__.UI">
+  <Grid ui:Layout.Area="settings">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <TextBlock Margin="{StaticResource PageHeaderMargin}" Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+    <TextBlock Margin="{StaticResource PageHeaderMargin}" Text="Settings" ui:Layout.Probe="title" ui:Layout.ProbeArea="settings" Style="{StaticResource PageTitleTextStyle}" />
 
     <!-- One section per topic, like tabs. Add a SettingsSection case and a panel for a new one. -->
-    <SelectorBar x:Name="Sections" Grid.Row="1" Margin="12,0,24,0" SelectionChanged="OnSectionChanged">
+    <SelectorBar x:Name="Sections" Grid.Row="1" Margin="12,0,24,0" MinHeight="48" SelectionChanged="OnSectionChanged">
       <SelectorBarItem Text="Appearance" Tag="Appearance" IsSelected="True" />
       <SelectorBarItem Text="About" Tag="About" />
     </SelectorBar>
@@ -20,7 +21,7 @@
       <Grid Margin="{StaticResource PageMargin}" MaxWidth="{StaticResource SettingsMaxWidth}" HorizontalAlignment="Stretch">
 
         <StackPanel x:Name="AppearancePanel" Spacing="{StaticResource SpaceXs}">
-          <Border Style="{StaticResource CardStyle}">
+          <Border Style="{StaticResource CardStyle}" ui:Layout.Probe="theme-card" ui:Layout.ProbeArea="settings">
             <Grid ColumnSpacing="{StaticResource SpaceLg}">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -39,7 +40,7 @@
               </ComboBox>
             </Grid>
           </Border>
-          <Border Style="{StaticResource CardStyle}">
+          <Border Style="{StaticResource CardStyle}" ui:Layout.Probe="accent-card" ui:Layout.ProbeArea="settings">
             <Grid ColumnSpacing="{StaticResource SpaceLg}">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -57,7 +58,7 @@
         </StackPanel>
 
         <StackPanel x:Name="AboutPanel" Spacing="{StaticResource SpaceXs}" Visibility="Collapsed">
-          <Border Style="{StaticResource CardStyle}">
+          <Border Style="{StaticResource CardStyle}" ui:Layout.Probe="about-card" ui:Layout.ProbeArea="settings">
             <StackPanel>
               <TextBlock x:Name="AppNameText" Style="{StaticResource BodyStrongTextBlockStyle}" />
               <TextBlock x:Name="VersionText" Style="{StaticResource CaptionTextBlockStyle}"

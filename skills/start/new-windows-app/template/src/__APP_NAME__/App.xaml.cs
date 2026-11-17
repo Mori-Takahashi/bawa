@@ -55,6 +55,8 @@ public partial class App : Application
 
         if (SelfTest.Requested)
             Window.RootElement.Loaded += async (_, _) => Quit(await SelfTest.RunAsync(Model, Window));
+        else if (Snapshot.Folder is not null)
+            Window.RootElement.Loaded += async (_, _) => Quit(await Snapshot.RunAsync(Window));
     }
 
     /// <summary>Quits with an exit code that scripts read.</summary>

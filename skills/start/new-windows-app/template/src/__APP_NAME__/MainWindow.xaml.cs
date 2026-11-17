@@ -1,4 +1,6 @@
+using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
+using Windows.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -66,6 +68,15 @@ public sealed partial class MainWindow : Window
             ElementTheme.Dark => TitleBarTheme.Dark,
             _ => TitleBarTheme.UseDefaultAppMode,
         };
+        // The caption buttons (minimize, maximize, close) follow the app's theme, not Windows'.
+        var dark = Root.ActualTheme == ElementTheme.Dark;
+        var bar = AppWindow.TitleBar;
+        bar.ButtonBackgroundColor = Colors.Transparent;
+        bar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        bar.ButtonForegroundColor = dark ? Colors.White : Colors.Black;
+        bar.ButtonHoverForegroundColor = dark ? Colors.White : Colors.Black;
+        bar.ButtonHoverBackgroundColor = dark ? Color.FromArgb(0x15, 255, 255, 255) : Color.FromArgb(0x09, 0, 0, 0);
+        bar.ButtonInactiveForegroundColor = dark ? Color.FromArgb(0x87, 255, 255, 255) : Color.FromArgb(0x72, 0, 0, 0);
     }
 
     private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

@@ -23,6 +23,18 @@
   <x:Double x:Key="SettingsMaxWidth">1000</x:Double>
   <x:Double x:Key="EmptyStateIconSize">48</x:Double>
 
+  <!-- Text with a fixed line height, so text boxes are whole pixels tall and sit on the grid. -->
+  <Style x:Key="PageTitleTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TitleTextBlockStyle}">
+    <Setter Property="LineHeight" Value="36" />
+    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+  </Style>
+  <Style x:Key="RowTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+    <Setter Property="LineHeight" Value="20" />
+    <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
   <!-- A card on a page: a raised layer on Mica, like the Settings app -->
   <Style x:Key="CardStyle" TargetType="Border">
     <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
