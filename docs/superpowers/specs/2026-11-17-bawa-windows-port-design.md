@@ -149,6 +149,33 @@ Alle sind meine Wahl. Der Nutzer hat den Vorschlag gesehen und nicht
 widersprochen. Paketversionen prüft der Builder beim Bauen auf den
 aktuellen stabilen Stand.
 
+**Ergebnis des Tests (Aufgabe 1, 2026-11-17):**
+
+- Versionen: `Microsoft.WindowsAppSDK` 2.6.5,
+  `Microsoft.Windows.SDK.BuildTools` 10.0.28000.2957,
+  `CommunityToolkit.Mvvm` 8.4.2, `Microsoft.Data.Sqlite` 10.0.15 (passend
+  zu .NET 10; 11.0.0 gäbe es auch), `xunit.v3` 4.0.3,
+  `xunit.runner.visualstudio` 4.0.1, `Microsoft.NET.Test.Sdk` 18.12.0,
+  `Svg.Skia` 5.2.3.
+- `dotnet build` baut eine handgeschriebene WinUI-3-csproj ohne Visual
+  Studio und ohne `dotnet new`-Vorlage. Die exe startet direkt aus `bin\`.
+- Aufnahme: `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT)` zeigt
+  Titelleiste, Fensterknöpfe, Navigationsleiste und Hintergrund in hell und
+  dunkel, und nur das eigene Fenster. Das Bild hat einen schwarzen Rand von
+  etwa 8 px (unsichtbarer Größenrahmen); zuschneiden auf
+  `DWMWA_EXTENDED_FRAME_BOUNDS`. `BitBlt` vom Bildschirm zeigt fremde
+  Fenster hinter dem eigenen: verworfen. `RenderTargetBitmap` lässt
+  Hintergrund und Navigationsleiste leer: nur Rückfall.
+- Ausgabe: `AttachConsole(-1)` plus `Console.WriteLine` erscheint in der
+  aufrufenden PowerShell, wenn die exe mit `& $exe ... | Out-String`
+  (oder einer anderen Pipe) läuft; die Pipe lässt PowerShell auch auf das
+  Ende warten. `Start-Process -Wait -PassThru` liefert den Exit-Code
+  (`Environment.ExitCode` vor `Application.Current.Exit()`), zeigt aber
+  keine Ausgabe. Deshalb zusätzlich die Logdatei.
+- Der eingebaute Settings-Eintrag der `NavigationView` folgt der
+  Systemsprache ("Einstellungen" auf deutschem Windows). Snapshots zeigen
+  ihn so.
+
 - **.NET 10**, `net10.0-windows10.0.19041.0`, Windows App SDK (aktuelle
   stabile Version), **unpackaged** (`WindowsPackageType=None`) und
   `WindowsAppSDKSelfContained=true`, damit die exe ohne installierte Runtime
