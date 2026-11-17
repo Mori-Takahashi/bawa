@@ -97,6 +97,9 @@ Alle anderen Skill-Namen bleiben. Jede Erwähnung in Skills, README,
    Erkenntnisse werden als Änderungen an den Skills committet.
 8. `version` in `plugin.json` auf `0.1.0`, `claude plugin validate . --strict`.
 
+Reihenfolge im Plan: Schritt 1 (Repo-Rahmen) kommt zuletzt, damit
+`plugin.json` und der Router nur Skills nennen, die es schon gibt.
+
 Phase 1 ist fertig, wenn Meilenstein 1 der Speicher-App läuft und alle
 Skills aus Schritt 1 bis 6 validiert und auf Windows erprobt sind.
 
