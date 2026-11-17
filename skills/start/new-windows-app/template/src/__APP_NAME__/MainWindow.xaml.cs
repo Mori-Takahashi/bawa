@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Windows.UI;
@@ -20,14 +21,21 @@ public sealed partial class MainWindow : Window
         TitleText.Text = Title;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarArea);
-        // Mica on Windows 11. Windows 10 keeps the default background.
-        if (MicaController.IsSupported()) SystemBackdrop = new MicaBackdrop();
-        AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 720));
+        // Mica on Windows 11. Without it (Windows 10, or APP_NO_MICA=1 to see that look on Windows 11)
+        // the window paints a solid theme background.
+        if (MicaController.IsSupported() && Environment.GetEnvironmentVariable("APP_NO_MICA") != "1") SystemBackdrop = new MicaBackdrop();
+        else SolidBackground.Visibility = Visibility.Visible;
+        // Resize takes physical pixels: scale 1100 x 720 effective pixels by the display's scaling.
+        var scale = GetDpiForWindow(Hwnd) / 96.0;
+        AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(1100 * scale), (int)(720 * scale)));
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "AppIcon.ico"));
 
         var settings = CommandUi.Accelerator(AppCommands.Settings);
         settings.Invoked += (_, e) => { ShowSettings(SettingsSection.Appearance); e.Handled = true; };
         Root.KeyboardAccelerators.Add(settings);
+
+        foreach (var page in NavPages.All)
+            Nav.MenuItems.Add(new NavigationViewItem { Content = page.Title, Tag = page.Page.ToString(), Icon = new FontIcon { Glyph = page.Glyph } });
 
         App.Theme.Changed += ApplyTheme;
         ApplyTheme();
@@ -50,6 +58,9 @@ public sealed partial class MainWindow : Window
 
     /// <summary>True when the window has Mica, false when it uses the plain fallback background.</summary>
     public bool HasBackdrop => SystemBackdrop is not null;
+
+    /// <summary>True when the window paints its own theme background, as it must without Mica.</summary>
+    public bool HasSolidBackground => SolidBackground.Visibility == Visibility.Visible;
 
     public void ShowPage(SidebarPage page)
         => Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>().First(i => (string)i.Tag == page.ToString());
@@ -99,8 +110,12 @@ public sealed partial class MainWindow : Window
         }
         if (args.SelectedItem is NavigationViewItem { Tag: string tag })
         {
-            App.Model.Page = Enum.Parse<SidebarPage>(tag);
-            if (ContentFrame.Content is not ItemsPage) ContentFrame.Navigate(typeof(ItemsPage));
+            var page = NavPages.All.First(p => p.Page.ToString() == tag);
+            App.Model.Page = page.Page;
+            if (ContentFrame.Content?.GetType() != page.PageType) ContentFrame.Navigate(page.PageType);
         }
     }
+
+    [LibraryImport("user32.dll")]
+    private static partial uint GetDpiForWindow(nint hwnd);
 }

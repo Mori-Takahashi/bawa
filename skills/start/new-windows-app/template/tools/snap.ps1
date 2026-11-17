@@ -3,11 +3,13 @@
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File tools\snap.ps1
 #        ... -File tools\snap.ps1 -Pages all,settings       only these pages
 #        ... -File tools\snap.ps1 -Accent green             another accent color
+#        ... -File tools\snap.ps1 -NoMica                   the Windows 10 look (no Mica) on Windows 11
 #        ... -File tools\snap.ps1 -Exe <path to a dev build>
 param(
     [string]$Exe = (Join-Path $env:LOCALAPPDATA "Programs\__APP_NAME__\__APP_NAME__.exe"),
     [string]$Pages = "",
-    [string]$Accent = ""
+    [string]$Accent = "",
+    [switch]$NoMica
 )
 $ErrorActionPreference = "Stop"
 if (-not (Test-Path -LiteralPath $Exe)) { Write-Output "no app at ${Exe}: run build.ps1 first"; exit 1 }
@@ -23,6 +25,7 @@ $env:APP_SEED = "1"
 $env:APP_SNAPSHOT = $shots
 if ($Pages) { $env:APP_SNAPSHOT_PAGES = $Pages } else { Remove-Item Env:APP_SNAPSHOT_PAGES -ErrorAction SilentlyContinue }
 if ($Accent) { $env:APP_ACCENT = $Accent } else { Remove-Item Env:APP_ACCENT -ErrorAction SilentlyContinue }
+if ($NoMica) { $env:APP_NO_MICA = "1" } else { Remove-Item Env:APP_NO_MICA -ErrorAction SilentlyContinue }
 
 $p = Start-Process -FilePath $Exe -Wait -PassThru
 $log = "$store.log"

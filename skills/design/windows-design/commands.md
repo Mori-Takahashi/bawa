@@ -16,13 +16,15 @@ context menus, and on the keyboard. One list, `AppCommands` in
 ## One list of commands
 
 ```csharp
-public static readonly AppCommand NewItem = new("new", "New item", "", VirtualKey.N, VirtualKeyModifiers.Control);
+public static readonly AppCommand NewItem = new("new", "New item", "\uE710", VirtualKey.N, VirtualKeyModifiers.Control, "Add an item to this list");
 ```
 
 Each command has an id, a title in sentence case, a Segoe Fluent Icons
-glyph, and a shortcut. `CommandUi.Bind(button, command)` gives an
-`AppBarButton` its label, icon, accelerator, and tooltip ("New item
-(Ctrl+N)"). `CommandUi.MenuItem(command, action)` builds the context menu
+glyph written as an escape (`"\uE710"`), a shortcut, and a help text that
+says what it does. `CommandUi.Bind(button, command)` gives an
+`AppBarButton` its label, icon, accelerator, name for Narrator, and
+tooltip: the help text, then the shortcut ("Add an item to this list
+(Ctrl+N)"), never the name again. `CommandUi.MenuItem(command, action)` builds the context menu
 item with the shortcut shown as text. Add every new action to
 `AppCommands.All`; the self-test checks that each has a shortcut and that
 none is used twice.

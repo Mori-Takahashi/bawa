@@ -1,5 +1,6 @@
 # Builds __APP_NAME__ and installs it to %LOCALAPPDATA%\Programs\__APP_NAME__, with a Start menu shortcut.
-# Build products live in %LOCALAPPDATA%\__APP_NAME__\build, outside the repo (and outside OneDrive).
+# Build products live in %LOCALAPPDATA%\__APP_NAME__-build, outside the repo (and OneDrive) and apart from
+# the user's data in %LOCALAPPDATA%\__APP_NAME__.
 #
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1            release build, install
 #        ... -File build.ps1 -Debug     debug build, install (faster)
@@ -11,6 +12,13 @@ $here = $PSScriptRoot
 $config = if ($Debug) { "Debug" } else { "Release" }
 $install = Join-Path $env:LOCALAPPDATA "Programs\$name"
 $exe = Join-Path $install "$name.exe"
+$marker = Join-Path $install ".bawa-app"
+
+# Never publish over another program that happens to have the same name.
+if ((Test-Path -LiteralPath $install) -and (Get-ChildItem -LiteralPath $install -Force | Select-Object -First 1) -and -not (Test-Path -LiteralPath $marker)) {
+    Write-Output "another program is installed at ${install}: give this app another name"
+    exit 1
+}
 
 # A running copy locks its files. Stop it only when asked to.
 $running = Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $exe }
@@ -37,6 +45,7 @@ $code = $LASTEXITCODE
 Get-Content -LiteralPath $log | Where-Object { $_ -match ': (error|warning) [A-Z]+[0-9]+' } | Select-Object -Unique
 Remove-Item -LiteralPath $log
 if ($code -ne 0 -or -not (Test-Path -LiteralPath $exe)) { Write-Output "build failed"; exit 1 }
+Set-Content -LiteralPath $marker -Value $name
 
 # Start menu shortcut, so people find the app like any other.
 $shortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "$name.lnk"

@@ -209,7 +209,7 @@ Status: todo
 
 ### S-010 Move items to the Recycle Bin
 As the user, I select rows and press Delete; after I confirm, they go to the Recycle Bin.
-Depends: S-003
+Depends: S-003, S-011 (nothing can be recycled before the protected paths exist)
 Acceptance:
 - [self] In the seeded test tree, recycling one folder removes it from disk and from the tree, and the parent size drops by its size.
 - [snap] The dialog reads "Move 2 items to the Recycle Bin?" with the total size, buttons "Move to Recycle Bin" and "Cancel", Cancel is the default.
@@ -218,9 +218,10 @@ Status: todo
 
 ### S-011 Keep Windows and programs safe
 As the user, I can never move system folders or the app itself to the Recycle Bin.
-Depends: S-010
+Depends: S-003
 Acceptance:
 - [unit] ProtectedPaths blocks C:\, C:\Windows, C:\Program Files, C:\ProgramData, the profile folder, $Recycle.Bin; it allows the profile's Downloads.
+- [self] ProtectedPaths is checked before any delete call: recycling C:\Windows from the seed run is refused.
 - [snap] On a protected row the command is disabled and its tooltip says why.
 - [unit] A folder that is an installed program's InstallLocation offers Uninstall instead.
 Status: todo

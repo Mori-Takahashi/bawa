@@ -82,9 +82,10 @@ Write these five under `## Design plan` in `docs/BRIEF.md`, or in
   get it from their own styles. Never put acrylic behind content.
 - Never stack materials. No custom background behind the navigation pane or
   title bar.
-- On Windows 10, Mica is missing and the window uses the plain theme
-  background. Check that the app still reads well (the self-test checks the
-  fallback exists).
+- On Windows 10, Mica is missing and the window paints a solid theme
+  background (`SolidBackground` in `MainWindow.xaml`). Check that the app
+  still reads well with `tools\snap.ps1 -NoMica`, which shows that look on
+  Windows 11. The self-test checks the window has one or the other.
 
 ## Commands and shortcuts
 
@@ -122,8 +123,9 @@ Write these five under `## Design plan` in `docs/BRIEF.md`, or in
   the default action, Escape cancels or closes, Delete removes, F2 renames.
 - Alt shows access keys (`AccessKey="N"`) on the command bar.
 - New items are selected and in view, so the user can act on them at once.
-- Tooltips name the shortcut: `New item (Ctrl+N)`. The template's
-  `CommandUi.Bind` writes them.
+- Tooltips say what the control does, then the shortcut: `Add an item to
+  this list (Ctrl+N)`, never the name again. The template's
+  `CommandUi.Bind` writes them from each command's help text.
 
 ## Color, type, dark mode
 

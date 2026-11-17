@@ -56,6 +56,8 @@ only fills an empty store, so a kept store goes stale.
 
 `ps1 tools\snap.ps1 -Pages all,starred` limits the pages. Add `settings`
 to include the Settings sections. `-Accent green` shows another accent.
+`-NoMica` shows the Windows 10 look (no Mica, solid background) on
+Windows 11.
 
 A page with more than one state (empty, working, result) needs a capture
 per state. Add it in `Snapshot.cs` after the page loop: put the app in the

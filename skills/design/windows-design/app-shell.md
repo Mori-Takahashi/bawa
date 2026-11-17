@@ -73,8 +73,10 @@ Windows snaps apps to halves and thirds, so a window can be 500 px wide.
   when the app is used snapped.
 - Command bars move overflowing buttons into the `...` menu by themselves.
 - Lists keep one column. Cards stack.
-- Snapshot a narrow size before release: resize with
-  `AppWindow.Resize(new SizeInt32(640, 720))` in a snapshot pass.
+- Snapshot a narrow size before release: resize in a snapshot pass.
+  `AppWindow.Resize` takes physical pixels, so multiply by the display
+  scaling like the template's `MainWindow` does:
+  `(int)(640 * GetDpiForWindow(Hwnd) / 96.0)`.
 
 ## Traps
 

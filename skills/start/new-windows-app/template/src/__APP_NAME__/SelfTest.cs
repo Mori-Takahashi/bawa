@@ -42,7 +42,9 @@ public static class SelfTest
             .Select(g => g.First().ShortcutText).ToList();
         Check("no shortcut is used twice", twice.Count == 0, string.Join(", ", twice));
 
-        Check("window has a backdrop or a solid fallback", window.HasBackdrop || !MicaController.IsSupported());
+        Check("window has Mica or a solid background", window.HasBackdrop || window.HasSolidBackground);
+        var unlisted = Enum.GetValues<SidebarPage>().Where(p => NavPages.All.All(n => n.Page != p)).ToList();
+        Check("every page has a navigation entry", unlisted.Count == 0, string.Join(", ", unlisted));
 
         AppOutput.Line(_failures == 0 ? $"SELFTEST PASS {_count} checks" : $"SELFTEST FAIL {_failures} of {_count} checks");
         return _failures == 0 ? 0 : 1;

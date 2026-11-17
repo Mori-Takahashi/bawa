@@ -19,6 +19,13 @@ if (Test-Path -LiteralPath (Join-Path $dest "$Name.slnx")) {
     Write-Output "$dest already has a $Name.slnx"
     exit 1
 }
+# build.ps1 installs to %LOCALAPPDATA%\Programs\<AppName>. Never take over another program's folder:
+# a BAWA app leaves a .bawa-app marker there; anything else with that name is someone else's.
+$installed = Join-Path $env:LOCALAPPDATA "Programs\$Name"
+if ((Test-Path -LiteralPath $installed) -and -not (Test-Path -LiteralPath (Join-Path $installed ".bawa-app"))) {
+    Write-Output "another program is installed at ${installed}: pick another name"
+    exit 1
+}
 New-Item -ItemType Directory -Force $dest | Out-Null
 
 $binary = @(".ico", ".png", ".jpg", ".gif")

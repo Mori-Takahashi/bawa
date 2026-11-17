@@ -6,6 +6,9 @@
       <RowDefinition Height="48" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
+    <!-- Without Mica (Windows 10, or APP_NO_MICA=1) the window paints its own theme background here. -->
+    <Border x:Name="SolidBackground" Grid.RowSpan="2" Visibility="Collapsed"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
     <!-- The title bar: the app's own content, dragged like the system one. -->
     <Grid x:Name="TitleBarArea" Grid.Row="0">
       <StackPanel Margin="16,0,0,0" Orientation="Horizontal" Spacing="{StaticResource SpaceMd}" VerticalAlignment="Center">
@@ -16,14 +19,7 @@
     <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed"
                     PaneDisplayMode="Left" IsSettingsVisible="True"
                     SelectionChanged="OnNavSelectionChanged">
-      <NavigationView.MenuItems>
-        <NavigationViewItem Content="All" Tag="All">
-          <NavigationViewItem.Icon><FontIcon Glyph="&#xE8FD;" /></NavigationViewItem.Icon>
-        </NavigationViewItem>
-        <NavigationViewItem Content="Starred" Tag="Starred">
-          <NavigationViewItem.Icon><FontIcon Glyph="&#xE734;" /></NavigationViewItem.Icon>
-        </NavigationViewItem>
-      </NavigationView.MenuItems>
+      <!-- The items come from NavPages in Navigation.cs (MainWindow constructor). -->
       <Frame x:Name="ContentFrame" />
     </NavigationView>
   </Grid>

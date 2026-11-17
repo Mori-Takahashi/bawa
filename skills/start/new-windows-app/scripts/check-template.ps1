@@ -8,12 +8,13 @@ $name = "CheckApp"
 $parent = Join-Path $env:TEMP "bawa check"
 $dest = Join-Path $parent $name
 $install = Join-Path $env:LOCALAPPDATA "Programs\$name"
-$build = Join-Path $env:LOCALAPPDATA $name
+$data = Join-Path $env:LOCALAPPDATA $name
+$build = Join-Path $env:LOCALAPPDATA "$name-build"
 $shortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "$name.lnk"
 
 function Remove-CheckApp {
     Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force
-    foreach ($path in @($parent, $install, $build, $shortcut)) {
+    foreach ($path in @($parent, $install, $data, $build, $shortcut)) {
         if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Recurse -Force }
     }
 }

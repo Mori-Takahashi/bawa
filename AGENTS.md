@@ -16,8 +16,10 @@ keep them identical.
   `pwsh`-only syntax). Skills call them with
   `powershell -NoProfile -ExecutionPolicy Bypass -File <script>`. C# tools
   are file programs run with `dotnet run <file>.cs`.
-- Only skills listed in `plugin.json` are ported. Other folders under
-  `skills/` are BAMA's macOS skills waiting to be rebuilt for Windows.
+- `skills/` holds only ported skills, all listed in `plugin.json`.
+  `ports/<stage>/<name>/` holds BAMA's macOS skills waiting to be rebuilt.
+  Installers search `skills/`, so a Mac skill never reaches a Windows user.
+  To port one, rebuild it, then move it into `skills/`.
 - `agents/openai.yaml` in every skill: Codex display name and short
   description. A user-invoked skill also sets
   `policy.allow_implicit_invocation: false`.

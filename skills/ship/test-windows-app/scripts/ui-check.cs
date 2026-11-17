@@ -2,7 +2,10 @@
 #:property PublishAot=false
 #:property TargetFramework=net10.0-windows
 // Drives the app from outside through UI Automation, the way Narrator and other tools see it.
-// Usage: $env:APP_STORE = "$env:TEMP\<App>-ui.db"; dotnet run tools\ui-check.cs -- <path to exe>
+// Usage: dotnet run tools\ui-check.cs -- <path to exe>
+// It always runs the app on a fresh test store in %TEMP%, whatever the shell has set:
+// the checks add and delete rows, and must never touch the user's real data.
+using System.Diagnostics;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
@@ -10,7 +13,13 @@ using FlaUI.Core.Input;
 using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
 
-var app = Application.Launch(args[0]);
+var exe = args[0];
+var appName = Path.GetFileNameWithoutExtension(exe);
+foreach (var old in Directory.GetFiles(Path.GetTempPath(), $"{appName}-ui.*")) File.Delete(old);
+var start = new ProcessStartInfo(exe) { UseShellExecute = false };
+start.Environment["APP_STORE"] = Path.Combine(Path.GetTempPath(), $"{appName}-ui.db");
+start.Environment.Remove("APP_SNAPSHOT");
+var app = Application.Launch(start);
 using var automation = new UIA3Automation();
 var failures = 0;
 void Check(string name, bool ok) { Console.WriteLine((ok ? "PASS " : "FAIL ") + name); if (!ok) failures++; }

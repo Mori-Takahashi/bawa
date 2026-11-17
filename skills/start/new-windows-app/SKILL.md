@@ -23,14 +23,15 @@ file. No Visual Studio needed.
 <AppName>/
   <AppName>.slnx            the solution
   global.json               dotnet test uses Microsoft Testing Platform
-  Directory.Build.props     build output in %LOCALAPPDATA%\<AppName>\build, outside the repo
+  Directory.Build.props     build output in %LOCALAPPDATA%\<AppName>-build, outside the repo and apart from the data
   build.ps1                 dotnet publish -> %LOCALAPPDATA%\Programs\<AppName> + Start menu shortcut
   CLAUDE.md                 build, check, and design rules for agents
   Icon/AppIcon.svg          the app icon source; AppIcon.ico is made from it
   src/<AppName>/
     App.xaml.cs             database location, seed data, self-test and snapshot start
     MainWindow.xaml(.cs)    NavigationView, own title bar, Mica, caption button colors
-    Navigation.cs           SidebarPage, SettingsSection, AppCommands (every action and shortcut)
+    Navigation.cs           SidebarPage + NavPages (the pages and the table the pane is built from),
+                            SettingsSection, AppCommands (every action and shortcut)
     ViewModels/             AppViewModel (CommunityToolkit.Mvvm)
     Pages/                  ItemsPage (list, command bar, empty state), SettingsPage (sections)
     Data/SeedData.cs        sample data for snapshots
@@ -92,8 +93,9 @@ file. No Visual Studio needed.
    ```
 
 6. If `docs/BRIEF.md` exists and its main data is a list people create
-   (tasks, notes, recipes), rename `Item` to that type and the pages in
-   `SidebarPage` to the brief's pages. When the data is something else (scan
+   (tasks, notes, recipes), rename `Item` to that type, and the pages in
+   `SidebarPage` and their rows in `NavPages` (same file) to the brief's
+   pages. When the data is something else (scan
    results, system state, a feed), leave the template as it is: the first M1
    story replaces `ItemsPage`, `Item`, and `ItemStore`. Either way, nothing
    else: features go through `improve-loop`, one story at a time.
@@ -116,7 +118,7 @@ way to run the app's real functions from a script.
 
 - `WMC9999` with "ErrorMessages.resources" or "keine Ressourcen gefunden": the
   XAML compiler hit a real error and cannot print its text. Open
-  `%LOCALAPPDATA%\<AppName>\build\obj\<AppName>\<config>\...\output.json` and
+  `%LOCALAPPDATA%\<AppName>-build\obj\<AppName>\<config>\...\output.json` and
   read the stack trace in `MSBuildLogEntries`. `BindingPathListener` means an
   `x:Bind` path. A common cause: an `x:Name` that equals a property name used
   by `x:Bind` in a `DataTemplate` (`x:Name="Title"` next to `{x:Bind Title}`).

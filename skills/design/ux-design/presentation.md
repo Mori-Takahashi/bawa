@@ -145,8 +145,8 @@ A second window needs its own title bar setup and backdrop; copy them from
 ## Navigation page
 
 Use for a place people come back to: a list, a collection, a report. Add a
-case to `SidebarPage`, a `NavigationViewItem` in `MainWindow.xaml`, and a
-page. Snapshot mode then visits it.
+case to `SidebarPage`, its row in `NavPages` (title, glyph, page class), and
+the page. The navigation pane and snapshot mode pick it up from there.
 
 ## Status instead of a dialog
 

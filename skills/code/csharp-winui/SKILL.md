@@ -160,7 +160,7 @@ ambiguous: write `System.IO.FileAttributes`.
 | `CS9248` partial property needs an implementation | The MVVM source generator is not running: same package fix |
 | `CS0104` ambiguous reference | Two imported namespaces share a name. Use the full name |
 | "The process cannot access the file" during build | The app is running: `build.ps1 -Open` |
-| App closes at start, `0xC000027B` in the event log | Missing XAML in the install (`EnableMsixTooling` must stay true), or an exception in a XAML event: run the debug exe from `bin\` to see it |
+| App closes at start, `0xC000027B` in the event log | Missing XAML in the install (`EnableMsixTooling` must stay true), or an exception in a XAML event: read the event log entry, and add an `App.UnhandledException` handler that writes `AppOutput.Line(e.Message)` |
 | `XamlParseException` at run time | A `StaticResource` key that does not exist, or a resource defined after its first use |
 | `dotnet run tool.cs` says reflection-based serialization is disabled | File-based apps default to Native AOT. Add `#:property PublishAot=false` |
 

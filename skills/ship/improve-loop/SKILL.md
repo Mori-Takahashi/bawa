@@ -36,8 +36,10 @@ existing databases keep loading.
 Follow the `csharp-winui` and `windows-design` skills, the story's `UX:`
 block, and `design/DESIGN-SYSTEM.md` if the app has one. Keep each page
 file (XAML plus code) under about 300 lines. Put new pages in the
-`SidebarPage` enum and new Settings sections in `SettingsSection`, so
-snapshot mode visits them. Long work runs off the UI thread with progress
+`SidebarPage` enum with a row in `NavPages` (title, glyph, page class), and
+new Settings sections in `SettingsSection`, so the navigation pane shows
+them and snapshot mode visits them. The self-test fails when a page has no
+row. Long work runs off the UI thread with progress
 and Cancel (`csharp-winui`, "The UI thread").
 
 ## 4. Build and snapshot

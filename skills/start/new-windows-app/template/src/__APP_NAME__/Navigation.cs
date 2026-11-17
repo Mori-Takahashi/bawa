@@ -1,9 +1,24 @@
+using __APP_NAME__.Pages;
 using Windows.System;
 
 namespace __APP_NAME__;
 
-/// <summary>The pages in the navigation pane. Snapshot mode and the self-test visit every case.</summary>
+/// <summary>The pages in the navigation pane. Snapshot mode and the self-test visit every case.
+/// A new case needs its row in <see cref="NavPages"/>; the self-test checks that.</summary>
 public enum SidebarPage { All, Starred }
+
+/// <summary>One navigation entry: the page, its label, its glyph, and the Page class that shows it.</summary>
+public sealed record NavPage(SidebarPage Page, string Title, string Glyph, Type PageType);
+
+/// <summary>The one list the navigation pane is built from. Add a row here for every SidebarPage case.</summary>
+public static class NavPages
+{
+    public static IReadOnlyList<NavPage> All { get; } =
+    [
+        new(SidebarPage.All, "All", "\uE8FD", typeof(ItemsPage)),
+        new(SidebarPage.Starred, "Starred", "\uE734", typeof(ItemsPage)),
+    ];
+}
 
 /// <summary>The sections of the Settings page, one per topic. Add a case for a new section.</summary>
 public enum SettingsSection { Appearance, About }

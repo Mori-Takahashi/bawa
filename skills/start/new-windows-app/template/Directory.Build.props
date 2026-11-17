@@ -1,12 +1,13 @@
 <Project>
   <!-- Shared settings for every project. Build output lives in
-       %LOCALAPPDATA%\__APP_NAME__\build, outside the repo, so OneDrive does not sync it. -->
+       %LOCALAPPDATA%\__APP_NAME__-build, outside the repo (OneDrive does not sync it) and apart from
+       %LOCALAPPDATA%\__APP_NAME__, which holds the user's data: deleting build output never touches it. -->
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <BuildRoot>$(LOCALAPPDATA)\__APP_NAME__\build\</BuildRoot>
+    <BuildRoot>$(LOCALAPPDATA)\__APP_NAME__-build\</BuildRoot>
     <BaseOutputPath>$(BuildRoot)bin\$(MSBuildProjectName)\</BaseOutputPath>
     <BaseIntermediateOutputPath>$(BuildRoot)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>

@@ -109,12 +109,16 @@ app. Copy [scripts/ui-check.cs](scripts/ui-check.cs) to `tools\` and grow
 it per story:
 
 ```powershell
-$env:APP_STORE = "$env:TEMP\<App>-ui.db"
 dotnet run tools\ui-check.cs -- "$env:LOCALAPPDATA\Programs\<App>\<App>.exe"
 # PASS New item adds a row
 # PASS Delete removes the selected row
 # PASS Ctrl+N adds a row
 ```
+
+The script starts the app itself, on a fresh `%TEMP%\<App>-ui.db`, set in
+the launch and not taken from the shell. Keep it that way when you grow
+it: a UI check adds and deletes rows, and a shell variable set in an
+earlier tool call is gone in the next one.
 
 - Prefer patterns (`Invoke` on a button, `SelectionItem.Select` on a row).
   They work while the app is in the background.
