@@ -12,9 +12,10 @@
                  Style="{StaticResource CaptionTextBlockStyle}" />
     </Grid>
     <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed"
-                    PaneDisplayMode="Left" IsSettingsVisible="True">
+                    PaneDisplayMode="Left" IsSettingsVisible="True"
+                    SelectionChanged="OnNavSelectionChanged">
       <NavigationView.MenuItems>
-        <NavigationViewItem Content="All" Tag="All" IsSelected="True">
+        <NavigationViewItem Content="All" Tag="All">
           <NavigationViewItem.Icon><FontIcon Glyph="&#xE8FD;" /></NavigationViewItem.Icon>
         </NavigationViewItem>
         <NavigationViewItem Content="Starred" Tag="Starred">
