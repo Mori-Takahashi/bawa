@@ -1,25 +1,24 @@
 {
-  "name": "bama",
+  "name": "bawa",
   "owner": {
-    "name": "Dave Ebbelaar",
-    "url": "https://github.com/daveebbelaar"
+    "name": "Lyonel Berzen",
+    "url": "https://github.com/Mori-Takahashi"
   },
-  "description": "Build any Mac app. Agent skills for native macOS apps with Swift and SwiftUI.",
+  "description": "Build any Windows app. Agent skills for native Windows apps with C# and WinUI 3. Based on BAMA by Dave Ebbelaar.",
   "plugins": [
     {
-      "name": "bama",
+      "name": "bawa",
       "source": "./",
-      "description": "Build any Mac app: skills to research, clone, plan, scaffold, design, integrate, optimize, test, and ship native macOS apps with Swift and SwiftUI.",
+      "description": "Build any Windows app: skills to research, clone, design, build, optimize, and test native Windows apps with C# and WinUI 3. Based on BAMA by Dave Ebbelaar.",
       "category": "development",
       "keywords": [
-        "macos",
-        "swift",
-        "swiftui",
-        "swiftdata",
-        "liquid-glass",
-        "computer-use",
-        "clone",
-        "performance",
+        "windows",
+        "winui",
+        "winui3",
+        "csharp",
+        "dotnet",
+        "fluent",
+        "mica",
         "skills"
       ]
     }
