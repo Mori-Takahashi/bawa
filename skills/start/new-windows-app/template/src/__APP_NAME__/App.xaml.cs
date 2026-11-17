@@ -8,7 +8,9 @@ namespace __APP_NAME__;
 
 /// <summary>
 /// Start-up: picks the database (APP_STORE overrides it), fills sample data
-/// (APP_SEED=1, test stores only), and opens the main window.
+/// (APP_SEED=1), and opens the main window. Self-test (--selftest) and
+/// snapshots (APP_SNAPSHOT) run after the window is shown, then quit.
+/// Seed data, self-test, and snapshots refuse to run on anything but a test store in %TEMP%.
 /// </summary>
 public partial class App : Application
 {
@@ -26,9 +28,22 @@ public partial class App : Application
         var storePath = StorePath.Resolve(Name, overridePath,
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
         var isTestStore = !string.IsNullOrEmpty(overridePath) && StorePath.IsTestStore(storePath, Path.GetTempPath());
+        AppOutput.Init(isTestStore ? storePath + ".log" : null);
+
+        var mode = SelfTest.Requested ? "SELFTEST"
+            : !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APP_SNAPSHOT")) ? "SNAPSHOT"
+            : Environment.GetEnvironmentVariable("APP_SEED") == "1" ? "SEED"
+            : null;
+        if (mode is not null && !isTestStore)
+        {
+            // Never touch the real database: refuse before opening any store.
+            AppOutput.Line($"{mode} refused: set APP_STORE to a file in %TEMP%");
+            Quit(1);
+            return;
+        }
 
         var store = new ItemStore(storePath);
-        if (Environment.GetEnvironmentVariable("APP_SEED") == "1" && isTestStore) SeedData.FillIfEmpty(store);
+        if (Environment.GetEnvironmentVariable("APP_SEED") == "1") SeedData.FillIfEmpty(store);
 
         Theme = new ThemeStore(Path.ChangeExtension(storePath, ".settings.json"));
         Theme.ApplyAccent();
@@ -37,5 +52,15 @@ public partial class App : Application
 
         Window = new MainWindow();
         Window.Activate();
+
+        if (SelfTest.Requested)
+            Window.RootElement.Loaded += async (_, _) => Quit(await SelfTest.RunAsync(Model, Window));
+    }
+
+    /// <summary>Quits with an exit code that scripts read.</summary>
+    public static void Quit(int code)
+    {
+        Environment.ExitCode = code;
+        Current.Exit();
     }
 }
