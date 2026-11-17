@@ -131,6 +131,24 @@ Never name your own type `File`, `Directory`, `Path`, `Task`, `Thread`,
 `using Windows.Storage;` next to `System.IO` makes `FileAttributes`
 ambiguous: write `System.IO.FileAttributes`.
 
+## Files and the file system
+
+- `EnumerationOptions` skips hidden and system files unless you set
+  `AttributesToSkip = 0`. A disk or backup tool that keeps the default
+  misses `desktop.ini`, `pagefile.sys`, and every hidden folder.
+- Skip folder junctions and symbolic links by checking
+  `FileAttributes.ReparsePoint` on directories only. OneDrive files are
+  reparse points too: `AttributesToSkip = ReparsePoint` drops them.
+- `IgnoreInaccessible = true` also hides a folder whose own listing fails.
+  To count folders you may not read, keep it false and catch
+  `UnauthorizedAccessException` around the listing.
+- Glyphs in C# strings are escapes: `"\uE8B7"`. The invisible character
+  itself survives the compiler but not every editor or script.
+- Windows PowerShell 5.1 reads UTF-8 files without a BOM as ANSI, so
+  `Get-Content | Set-Content` garbles non-ASCII text, and `[IO.File]`
+  resolves relative paths against the process folder. Edit with the editor
+  tool, or `[IO.File]` with full paths.
+
 ## Build and run errors
 
 | Error | Fix |

@@ -45,12 +45,15 @@ public static class Scanner
     public static List<FolderSize> Scan(string root, IProgress<int> progress, CancellationToken cancel)
     {
         var result = new List<FolderSize>();
-        var skip = new EnumerationOptions { IgnoreInaccessible = true, AttributesToSkip = System.IO.FileAttributes.ReparsePoint };
-        var deep = new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true, AttributesToSkip = System.IO.FileAttributes.ReparsePoint };
+        // AttributesToSkip = 0 keeps hidden and system files (the default skips them).
+        var skip = new EnumerationOptions { IgnoreInaccessible = true, AttributesToSkip = 0 };
+        var deep = new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true, AttributesToSkip = 0 };
         var last = Stopwatch.StartNew();
         foreach (var dir in Directory.EnumerateDirectories(root, "*", skip))
         {
             cancel.ThrowIfCancellationRequested();
+            // Junctions and symbolic links loop or count twice. Files stay: OneDrive files are reparse points too.
+            if (new DirectoryInfo(dir).Attributes.HasFlag(System.IO.FileAttributes.ReparsePoint)) continue;
             var bytes = new DirectoryInfo(dir).EnumerateFiles("*", deep).Sum(f => f.Length);
             result.Add(new FolderSize(dir, bytes));
             if (last.ElapsedMilliseconds > 100) { progress.Report(result.Count); last.Restart(); }
@@ -68,8 +71,9 @@ public sealed record FolderSize(string Path, long Bytes)
 ```
 
 `IgnoreInaccessible` skips folders the user may not read instead of
-throwing. `AttributesToSkip = ReparsePoint` skips junctions and symbolic
-links, which would count a folder twice or loop forever.
+throwing. This sketch only skips junctions at the top level; a full scanner
+walks folder by folder and checks `ReparsePoint` on each folder, never on
+files. `csharp-winui`, "Files and the file system", has the details.
 
 ## Confirm, then move to the Recycle Bin
 

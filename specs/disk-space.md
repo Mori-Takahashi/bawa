@@ -58,7 +58,7 @@ like TreeSize, on Mica.
 | --- | --- | --- |
 | Pick a folder or drive | `FolderPicker` with `InitializeWithWindow` (`windows-design`, patterns.md) | None |
 | List drives | `DriveInfo.GetDrives()` where `DriveType == Fixed` or `Removable` and `IsReady` | None |
-| Walk the tree | `DirectoryInfo.EnumerateFileSystemInfos("*", options)`, one recursive walk, `EnumerationOptions { IgnoreInaccessible = true, AttributesToSkip = ReparsePoint, RecurseSubdirectories = false }` | None |
+| Walk the tree | `DirectoryInfo.EnumerateFileSystemInfos("*", options)`, one recursive walk, `EnumerationOptions { IgnoreInaccessible = false, AttributesToSkip = 0, RecurseSubdirectories = false }`; skip directories with `ReparsePoint`, catch `UnauthorizedAccessException` per folder | None |
 | File size | `FileInfo.Length` comes from the directory listing, no extra call per file | None |
 | Size on disk | `GetCompressedFileSizeW` for compressed and sparse files (`FileAttributes.Compressed`, `SparseFile`) only | None |
 | Online-only OneDrive files | Attribute `RecallOnDataAccess` (0x400000) or `Offline`: count 0 on disk, mark "online-only" | None |
@@ -235,7 +235,8 @@ Status: todo
 
 ## Gotchas
 
-- Junctions and symbolic links (`C:\Users\<you>\Application Data`, `C:\Documents and Settings`) point back into the tree. Following them loops or counts folders twice. Skip `ReparsePoint` entries while walking.
+- Junctions and symbolic links (`C:\Users\<you>\Application Data`, `C:\Documents and Settings`) point back into the tree. Following them loops or counts folders twice. Skip directories with `ReparsePoint`, but not files: OneDrive files are reparse points too.
+- `EnumerationOptions` skips hidden and system files by default. Set `AttributesToSkip = 0`, or `pagefile.sys`, `hiberfil.sys`, and every hidden folder go missing from the totals.
 - `C:\Windows\WinSxS` is full of hard links: the same file shows up in several folders. Totals for the Windows folder are larger than the real space. Label that row "includes files shared with other folders" instead of trying to dedupe in version one.
 - OneDrive files that are online-only report their full `Length` but use no space. Check `RecallOnDataAccess` (0x400000) and `Offline` attributes and count them as 0 on disk, or a OneDrive folder looks like it holds gigabytes it does not.
 - `IgnoreInaccessible = true` hides access errors on files, but a folder whose own listing fails must still be counted as unread, or the user never learns sizes are missing.
@@ -247,4 +248,4 @@ Status: todo
 - Updating the tree once per file freezes the window on a full drive (millions of files). Build the tree off the UI thread and show it when the scan ends; during the scan only the counters change.
 - Scanning C:\ as a normal user takes one to several minutes on an SSD. Never scan at start; the user picks what to scan.
 
-Done when scanning C:\ finishes without freezing the window, a test folder's total matches File Explorer's "Size on disk" within 1%, the Programs page lists what Settings > Apps lists for desktop programs, and nothing protected can reach the Recycle Bin.
+Done when scanning C:\ finishes without freezing the window, a test folder's total matches File Explorer's "Size" within 1%, the Programs page lists what Settings > Apps lists for desktop programs, and nothing protected can reach the Recycle Bin.

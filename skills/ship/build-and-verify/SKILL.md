@@ -57,6 +57,12 @@ only fills an empty store, so a kept store goes stale.
 `ps1 tools\snap.ps1 -Pages all,starred` limits the pages. Add `settings`
 to include the Settings sections. `-Accent green` shows another accent.
 
+A page with more than one state (empty, working, result) needs a capture
+per state. Add it in `Snapshot.cs` after the page loop: put the app in the
+state with the same command the user runs (for example scan the seed
+folder), capture `<page>-<state>-<mode>.png`, and reset. Then `-Pages`
+takes that id too.
+
 In every image, look for three bugs agents often miss: a focus ring
 nobody asked for, a scroll bar with nothing to scroll, and an empty band
 under short content. The fixes are in `windows-design`, "Windows open

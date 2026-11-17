@@ -28,6 +28,8 @@ Windows blocks `.ps1` files by default.
 - Never test against the real database in `%LOCALAPPDATA%\__APP_NAME__\`.
 - Then check the grid: `tools\grid-lint.ps1` and `dotnet run tools\check-layout.cs -- "$env:TEMP\__APP_NAME__-shots\*-layout.json"`. Both print PASS.
 - A change is done when the build has no errors, the grid checks pass, and you looked at the light and dark snapshots.
+- Windows PowerShell 5.1 reads UTF-8 files without a BOM as ANSI: `Get-Content` piped to `Set-Content` garbles every non-ASCII character. Edit files with the editor tool, or `[IO.File]::ReadAllText` and `WriteAllText` with full paths (`[IO.File]` resolves relative paths against the process folder, not the PowerShell location).
+- Write Segoe Fluent Icons glyphs as escapes (`"\uE710"` in C#, `&#xE710;` in XAML), never as the invisible character itself.
 
 ## Design rules
 

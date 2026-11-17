@@ -125,7 +125,15 @@ dotnet run tools\ui-check.cs -- "$env:LOCALAPPDATA\Programs\<App>\<App>.exe"
 - Wait for a condition (the `Within` helper, up to 3 seconds), never a
   fixed sleep. A fixed sleep passes on a fast run and fails on a cold start.
 - A control that UI Automation cannot find by name has no name for Narrator
-  either. Give it `AutomationProperties.Name`.
+  either. Give it `AutomationProperties.Name`. Exception: a `TreeView`'s
+  name lands on a `Group` around it, and the `Tree` inside has none. Find
+  the tree by `ControlType.Tree`.
+- Start the app in the state a check needs. A start argument that is also a
+  real feature works best: `DiskSpace.exe <folder>` scans that folder, so
+  `ui-check.cs` starts with a result on screen.
+- The check prints `PASS`, `FAIL`, or `SKIP` per line and exits 1 on a
+  failure. Run it twice: a check that passes once and fails once waits for
+  a fixed time somewhere.
 
 Computer use is the last resort, for what only a person can do: a drag from
 Explorer, a dialog from another app, a UAC prompt. Tell the user to keep off

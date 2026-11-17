@@ -31,7 +31,7 @@ public sealed partial class MainWindow : Window
 
         App.Theme.Changed += ApplyTheme;
         ApplyTheme();
-        ShowPage(SidebarPage.All);
+        ShowPage(Enum.GetValues<SidebarPage>()[0]);
         Root.Loaded += (_, _) => FocusQuietly();
     }
 

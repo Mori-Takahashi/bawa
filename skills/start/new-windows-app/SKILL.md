@@ -91,9 +91,12 @@ file. No Visual Studio needed.
    dotnet run tools\check-layout.cs -- "$env:TEMP\Tasks-shots\*-layout.json"
    ```
 
-6. If `docs/BRIEF.md` exists, rename `Item` to the brief's main type and the
-   pages in `SidebarPage` to the brief's pages. Nothing else: features go
-   through `improve-loop`, one story at a time. Build, snapshot, commit.
+6. If `docs/BRIEF.md` exists and its main data is a list people create
+   (tasks, notes, recipes), rename `Item` to that type and the pages in
+   `SidebarPage` to the brief's pages. When the data is something else (scan
+   results, system state, a feed), leave the template as it is: the first M1
+   story replaces `ItemsPage`, `Item`, and `ItemStore`. Either way, nothing
+   else: features go through `improve-loop`, one story at a time.
 
 ## When to switch to an MSIX package
 

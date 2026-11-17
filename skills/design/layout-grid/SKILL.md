@@ -36,11 +36,18 @@ Below, `ps1` stands for `powershell -NoProfile -ExecutionPolicy Bypass -File`.
    - Numbers in a column: `TextAlignment="Right"` in a fixed-width column,
      so units and digits line up.
    - An icon with text: a horizontal `StackPanel` with `Spacing="{StaticResource SpaceSm}"`.
-5. Know the controls' own insets. A `ListViewItem` pads its content 16 px
-   on the left, so a list under a title at 24 px gets `Padding="8,..."`.
-   A `SelectorBar` is 47 px tall: give it `MinHeight="48"`.
+5. Know the controls' own insets and heights. A `ListViewItem` pads its
+   content 16 px on the left, so a list under a title at 24 px gets
+   `Padding="8,..."`. A `SelectorBar` is 47 px tall: `MinHeight="48"`. A
+   one-line `InfoBar` is 53 px: `MinHeight="56"`, and bind its
+   `Visibility` with `IsOpen`, because a closed InfoBar keeps its margin. A
+   `ProgressBar` is 3 px: `Height="4"` when it is a size bar in a card.
+   A `CommandBar` row is 48 px, so a 36 px title beside it sits 6 px down:
+   probe the header block (`Layout.Probe` on the header `Grid`), not the
+   title text.
 6. Text that must line up with other views uses a style with a fixed line
-   height (`PageTitleTextStyle`, `RowTextStyle`: `LineHeight` plus
+   height (`PageTitleTextStyle`, `SectionTitleTextStyle`, `RowTextStyle`,
+   `CaptionLineTextStyle`: `LineHeight` plus
    `LineStackingStrategy="BlockLineHeight"`). Without it a text box is a
    fraction of a pixel tall, like 37.24, and every gap below it is off.
 7. Dialogs are a `ContentDialog`, which keeps itself between 320 and 548 px
@@ -152,6 +159,7 @@ breaks the file (`WMC9997`).
 | overlap | a `TranslateTransform`, a negative margin, or a fixed height | remove it, let the panel size the view |
 | x between pixels | a fractional number, or a centered view of odd width | a whole number from the scale |
 | `=name` has different left edges | a scroll bar that takes width, or a pane's inset on one side | line both up on the pane's content edge |
+| `=name>` has different right edges | column headers above a `TreeView` or `ListView` whose rows end at another x | change the header's right margin by the difference the message shows |
 
 Done when `tools\grid-lint.ps1` passes, `tools\check-layout.cs` passes on
 the layout files of every page you touched, and every custom page and card
