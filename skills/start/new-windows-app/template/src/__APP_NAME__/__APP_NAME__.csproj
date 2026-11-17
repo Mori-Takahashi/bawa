@@ -13,6 +13,9 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
+    <!-- Builds the app's .pri with the compiled XAML. Without it, dotnet publish
+         leaves the XAML out and the installed app crashes at start (0xC000027B). -->
+    <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <Version>0.1.0</Version>
     <!-- LibraryImport (Win32 calls) generates unsafe marshalling code. -->
