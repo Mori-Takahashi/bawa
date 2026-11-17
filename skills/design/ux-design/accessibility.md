@@ -1,14 +1,14 @@
 # Accessibility audit
 
 How to check step 7 of [SKILL.md](SKILL.md) on a running build, and the
-SwiftUI modifiers that fix what it finds. Standard controls do most of this
+WinUI properties that fix what it finds. Standard controls do most of this
 on their own. Custom controls need the work.
 
 ## Contents
 
 - Run the audit
 - Keyboard
-- VoiceOver
+- Narrator
 - Custom controls
 - Color and contrast
 - Motion and transparency
@@ -16,177 +16,90 @@ on their own. Custom controls need the work.
 
 ## Run the audit
 
-1. Build and open the app: `./build.sh --open`.
-2. Open Accessibility Inspector: `open -a "Accessibility Inspector"` (it
-   ships with Xcode). Pick the app as the target, open the Audit tab, and
-   run the audit on each new view.
-3. Turn on keyboard navigation: System Settings > Keyboard > Keyboard
-   navigation. Run the whole flow with Tab, arrows, Return, Escape, and
-   Space.
-4. Turn on VoiceOver with Command-F5. Move with Control-Option and the
-   arrow keys. Run the flow again, listening.
-5. In System Settings > Accessibility > Display, turn on Increase
-   Contrast, Reduce Motion, and Reduce Transparency one at a time. Look at
-   each new view in light and dark mode.
+1. Build and open the app:
+   `powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1 -Open`.
+2. Run Accessibility Insights for Windows
+   (`winget install Microsoft.AccessibilityInsights`). Pick the app window
+   and run FastPass on each new view.
+3. Run the whole flow with the keyboard only: Tab, Shift+Tab, arrows,
+   Enter, Space, Escape, and the shortcuts.
+4. Turn on Narrator with Ctrl+Win+Enter. Move with Tab and the arrow keys,
+   and with Caps Lock+arrows for Narrator's own navigation. Run the flow
+   again, listening.
+5. In Settings > Accessibility, turn on a contrast theme (Left Alt+Left
+   Shift+Print Screen), set Text size to 150%, and turn off Animation
+   effects and Transparency effects, one at a time. Look at each new view.
 
-Done when the audit shows no issues for the new views and both runs
+Done when FastPass shows no failures for the new views and both runs
 finish the flow without the mouse.
 
 ## Keyboard
 
-- Every step of the flow is reachable with the keyboard, in reading order.
-- The default button responds to Return, Cancel to Escape.
-- A new item gets focus so people can type at once.
+- Every step is reachable with the keyboard, in reading order. Set
+  `TabIndex` only when the visual order and the tree order differ.
+- The default button responds to Enter, Cancel to Escape (`ContentDialog`
+  does both).
+- A new item is selected and scrolled into view (`ListView.ScrollIntoView`).
+- Lists move with the arrow keys; a whole list is one Tab stop.
+- `AccessKey="N"` gives command bar buttons a key tip under Alt.
 
-```swift
-@FocusState private var focused: Item.ID?
+## Narrator
 
-List(items) { item in
-    ItemRow(item: item).focused($focused, equals: item.id)
-}
-.onChange(of: items.count) { focused = items.last?.id }
-```
+Narrator reads the UI Automation name, role, and state.
 
-## VoiceOver
-
-- The label matches the words on screen. An icon-only button keeps its
-  title as the VoiceOver label; the tooltip describes what it does.
-- A row reads as one element, with its actions available from the
-  VoiceOver actions menu.
-- Decorative images stay silent.
-
-```swift
-Button("New Task", systemImage: "plus", action: addTask)
-    .labelStyle(.iconOnly)          // VoiceOver still reads "New Task"
-    .help("Add a task to this list (⌘N)")
-
-HStack { /* checkbox, title, due date */ }
-    .accessibilityElement(children: .combine)
-    .accessibilityAction(named: "Complete") { complete(item) }
-
-Image("hero").accessibilityHidden(true)
-```
-
-- Section titles are headings, so VoiceOver can jump between them:
-  `.accessibilityAddTraits(.isHeader)`.
-- When content changes without a click (a sync finishes, a filter empties
-  the list), post an announcement:
-  `AccessibilityNotification.Announcement("No tasks left").post()`.
-- A chart gets a one-line summary as its label ("Spending rose 12% in
-  October").
-- Voice Control says what people see: the visible label and the
-  accessibility label are the same words.
-- No view that hides itself on a timer is the only way to act. An Undo
-  toast also has Edit > Undo, Command-Z.
+- Every icon-only control has a name:
+  `AutomationProperties.Name="Delete"`, the same word as its tooltip's
+  first words.
+- A value shown only as color or an icon gets text Narrator can read:
+  `AutomationProperties.Name="Starred"` on the star icon.
+- Help beyond the name goes in `AutomationProperties.HelpText`.
+- Headings: `AutomationProperties.HeadingLevel="Level1"` on the page title,
+  so Narrator can jump by heading.
+- A changing status (a scan count, a save result) is announced:
+  `AutomationProperties.LiveSetting="Polite"` on the text that changes.
+- Decorative images: `AutomationProperties.AccessibilityView="Raw"`.
 
 ## Custom controls
 
-Every custom control answers four questions for VoiceOver (WWDC26-220):
-what it is (label), what it is set to (value), what people can do
-(actions), and what changed (feedback). A control that only works with a
-drag also offers actions, so Switch Control and Voice Control reach it.
+A control you draw yourself (a treemap, a chart, a custom slider) needs:
 
-```swift
-struct VolumeDial: View {
-    @Binding var level: Double            // 0...1
-    @State private var lastAnnounced = Date.distantPast
+- **Name**: what it is, from `AutomationProperties.Name`.
+- **Value**: its current value as text, like "Downloads, 12.4 GB, 31% of
+  the drive".
+- **Actions**: keyboard focus (`IsTabStop="True"`), Enter or Space to act,
+  arrows to move between its parts.
+- **Feedback**: a visible focus rectangle (`UseSystemFocusVisuals="True"`)
+  and a change Narrator announces.
 
-    var body: some View {
-        Circle()
-            .trim(from: 0, to: level)
-            .stroke(.tint, lineWidth: 6)
-            .frame(width: 44, height: 44)
-            .gesture(DragGesture().onChanged { drag in
-                level = min(1, max(0, level - drag.translation.height / 400))
-                announce()
-            })
-            .accessibilityElement()
-            .accessibilityLabel("Volume")
-            .accessibilityValue(level.formatted(.percent.precision(.fractionLength(0))))
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment: level = min(1, level + 0.1)
-                case .decrement: level = max(0, level - 0.1)
-                @unknown default: break
-                }
-            }
-            .accessibilityAction(named: "Mute") { level = 0 }
-    }
-
-    /// During a drag, speak the value at most every 0.3 s.
-    private func announce() {
-        guard Date.now.timeIntervalSince(lastAnnounced) >= 0.3 else { return }
-        lastAnnounced = .now
-        AccessibilityNotification.Announcement(level.formatted(.percent.precision(.fractionLength(0)))).post()
-    }
-}
-```
-
-A two-axis control (a color square, a position pad) gets four named
-actions, "Move Up", "Move Down", "Move Left", "Move Right", with a fixed
-step that stops at the edges.
+For a control with parts (a treemap of folders), give each part its own
+focusable element with a name, or write an `AutomationPeer`
+(`OnCreateAutomationPeer`) that exposes the parts as children. Then check
+it with Accessibility Insights' Inspect mode.
 
 ## Color and contrast
 
-- Status color always comes with an icon or a word.
-- Body text contrast is at least 4.5 to 1 against its background, in light
-  and dark mode. Aim for 7 to 1 for small text in custom colors.
-- Honor Differentiate Without Color and Increase Contrast in custom views.
-
-```swift
-@Environment(\.accessibilityDifferentiateWithoutColor) private var noColorOnly
-@Environment(\.colorSchemeContrast) private var contrast
-
-Image(systemName: noColorOnly ? "exclamationmark.circle.fill" : "circle.fill")
-    .foregroundStyle(.red)
-```
+- Text uses theme brushes, which meet 4.5:1 in light, dark, and contrast
+  themes.
+- Meaning never rests on color alone: an icon or a word goes with it.
+- In a contrast theme, Windows replaces the theme brushes with the user's
+  colors. Fixed colors stay and often become unreadable: never use them for
+  text.
+- Charts and treemaps use the accent plus neutral fills, with labels or a
+  legend in text.
 
 ## Motion and transparency
 
-Replace slides, springs, and parallax with a fade when Reduce Motion is on.
-Never animate a blur or a change in depth (scale toward the viewer) under
-Reduce Motion, and make springs tighter. Never make people wait for an
-animation: it can be interrupted. Give custom glass a solid fallback when
-Reduce Transparency is on.
-
-```swift
-@Environment(\.accessibilityReduceMotion) private var reduceMotion
-@Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-.transition(reduceMotion ? .opacity : .move(edge: .trailing))
-.background(reduceTransparency ? AnyShapeStyle(.background) : AnyShapeStyle(.regularMaterial))
-```
+- Built-in controls follow "Animation effects" and "Transparency effects"
+  on their own.
+- Custom motion checks `new Windows.UI.ViewManagement.UISettings().AnimationsEnabled`
+  and shows the end state at once when it is off.
+- Mica turns into a solid color when transparency is off. The app must look
+  right in both.
 
 ## Text size
 
-- macOS body text is 13 pt and nothing is under 10 pt. Use text styles
-  (`.body`, `.callout`, `.caption`), not fixed sizes.
-- Truncated text shows its full value in a tooltip.
-
-```swift
-Text(item.title)
-    .lineLimit(1)
-    .truncationMode(.tail)
-    .help(item.title)
-```
-
-macOS has no Dynamic Type, but people must be able to enlarge text to
-200%. An app people read in (notes, articles, mail) adds View > Bigger,
-Smaller, and Actual Size, and scales its reading text from one setting:
-
-```swift
-struct TextSizeCommands: Commands {
-    @AppStorage("textScale") private var scale = 1.0
-    var body: some Commands {
-        CommandGroup(after: .toolbar) {
-            Button("Bigger") { scale = min(2, scale + 0.1) }.keyboardShortcut("+")
-            Button("Smaller") { scale = max(0.8, scale - 0.1) }.keyboardShortcut("-")
-            Button("Actual Size") { scale = 1 }.keyboardShortcut("0")
-        }
-    }
-}
-
-// In the reading view:
-@AppStorage("textScale") private var scale = 1.0
-Text(note.body).font(.system(size: 13 * scale))
-```
+- Windows' Text size setting (Settings > Accessibility > Text size) scales
+  text up to 225%. Controls grow with it.
+- No fixed heights on anything that holds text. Let rows grow; wrap or
+  truncate with a tooltip.
+- Check the main pages at 150%: nothing clips or overlaps.

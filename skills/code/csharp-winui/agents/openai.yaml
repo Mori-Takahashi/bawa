@@ -1,0 +1,3 @@
+interface:
+  display_name: "C# and WinUI"
+  short_description: "UI thread, MVVM, x:Bind, SQLite, and build errors"

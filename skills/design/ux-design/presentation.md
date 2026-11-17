@@ -1,233 +1,182 @@
 # Where a feature opens
 
 Code for each row of the surface table in [SKILL.md](SKILL.md). It compiles
-on macOS 26 with Swift 6.2 and main-actor default isolation (the
-`new-mac-app` template). `Item` is the template's SwiftData model, with a
-`dueDate: Date` field added for the popover example.
+in an app made from the `new-windows-app` template (.NET 10, WinUI 3,
+Windows App SDK 2.6).
 
 ## Contents
 
 - Inline
-- Inspector
-- Popover
-- Panel
-- Sheet
-- New window
-- Sidebar page or detail
+- Details pane
+- Flyout
+- TeachingTip
+- ContentDialog
 - Confirmation dialog
-- Alert
-- Status instead of an alert
+- New window
+- Navigation page
+- Status instead of a dialog
 - Unsaved changes
 
 ## Inline
 
-Use for one value on something already on screen. No surface opens, so
-nothing needs closing. Save on Return or when focus leaves the field.
+Use for one value on something already on screen. Nothing opens, so nothing
+needs closing. Enter saves, Escape puts the old text back, leaving the box
+saves.
 
-```swift
-struct ItemRow: View {
-    @Bindable var item: Item
-    @FocusState private var editing: Bool
+```xml
+<TextBox x:Name="TitleBox" PlaceholderText="Task title" AutomationProperties.Name="Task title"
+         KeyDown="OnTitleKeyDown" LostFocus="OnTitleLostFocus" />
+```
 
-    var body: some View {
-        TextField("Title", text: $item.title)
-            .textFieldStyle(.plain)
-            .focused($editing)
-            .onSubmit { editing = false }
-    }
+```csharp
+private void OnTitleKeyDown(object sender, KeyRoutedEventArgs e)
+{
+    if (e.Key == VirtualKey.Enter) { Save(); e.Handled = true; }
+    else if (e.Key == VirtualKey.Escape) { TitleBox.Text = _saved; e.Handled = true; }
 }
+private void OnTitleLostFocus(object sender, RoutedEventArgs e) => Save();
 ```
 
-## Inspector
+## Details pane
 
-Use for details of the selection while people keep working in the list.
-It stays open across selections. `InspectorCommands()` on the scene adds
-View > Show Inspector, Control-Command-I.
+Use for details of the selection while people keep working in the list. It
+stays open across selections and shows a short empty state with nothing
+selected. Layout rules: `windows-design`, app-shell.md.
 
-```swift
-List(items, selection: $selection) { item in ItemRow(item: item) }
-    .inspector(isPresented: $showInspector) {
-        if let item = selection.flatMap(find) {
-            ItemInspector(item: item)
-        } else {
-            ContentUnavailableView("No Selection", systemImage: "sidebar.right")
-        }
-    }
-    .inspectorColumnWidth(min: 220, ideal: 260, max: 360)
+```xml
+<Grid>
+  <Grid.ColumnDefinitions>
+    <ColumnDefinition Width="*" />
+    <ColumnDefinition x:Name="DetailsColumn" Width="320" />
+  </Grid.ColumnDefinitions>
+  <!-- the list in column 0 -->
+  <Border Grid.Column="1" BorderThickness="1,0,0,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+          Padding="{StaticResource PageMargin}">
+    <TextBlock Text="No selection" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+  </Border>
+</Grid>
 ```
 
-## Popover
+## Flyout
 
 Use for a few related choices tied to one control. It closes when people
-click outside or pick an item, and it keeps their changes. Only an explicit
-Cancel throws them away. It never warns, never holds a warning, and opens
-one at a time. A popover people want to keep open can detach into a panel
-(AppKit `NSPopover` with `detachableWindow`; SwiftUI has no detach).
+click outside it or press Escape, and changes apply at once.
 
-```swift
-Button("Due Date", systemImage: "calendar") { showDate = true }
-    .help("Set the due date")
-    .popover(isPresented: $showDate, arrowEdge: .bottom) {
-        DatePicker("Due Date", selection: $item.dueDate, displayedComponents: .date)
-            .datePickerStyle(.graphical)
-            .labelsHidden()
-            .padding()
-    }
+```xml
+<Button Content="Due date">
+  <Button.Flyout>
+    <Flyout Placement="Bottom">
+      <StackPanel Spacing="{StaticResource SpaceSm}">
+        <CalendarView x:Name="DueCalendar" SelectionMode="Single" />
+        <Button Content="Clear due date" Click="OnClearDue" />
+      </StackPanel>
+    </Flyout>
+  </Button.Flyout>
+</Button>
 ```
 
-## Panel
+A list of commands is a `MenuFlyout`, not a `Flyout`.
 
-Use when people give input again and again and watch the result (find and
-replace, a color or font picker), or keep a tool open beside their work.
-A panel floats over the app, hides when the app is not in front, has no
-minimize button, and stays out of the Window menu's list. Its title is a
-noun ("Inspector"), and its menu item says "Show Inspector", never "panel".
+## TeachingTip
 
-```swift
-// In the App body
-UtilityWindow("Inspector", id: "inspector") {
-    InspectorPanel()
+Use once, to point at a control people have not found yet. Save that it
+was shown, and never show it again.
+
+```xml
+<Button x:Name="ScanButton" Content="Scan" />
+<TeachingTip x:Name="ScanTip" Target="{x:Bind ScanButton}" Title="Start with a scan"
+             Subtitle="Scan a drive to see what takes the most space." IsLightDismissEnabled="True" />
+```
+
+```csharp
+public void ShowTipOnce(bool seen) { if (!seen) ScanTip.IsOpen = true; }
+```
+
+## ContentDialog
+
+Use for one short task that must finish or cancel before going on. The title
+names the task, the primary button names the action, and the box is
+selected so typing replaces the name.
+
+```csharp
+public async Task<string?> AskNewNameAsync(string current)
+{
+    var box = new TextBox { Text = current };
+    AutomationProperties.SetName(box, "Name");
+    box.SelectAll();
+    var dialog = new ContentDialog
+    {
+        XamlRoot = XamlRoot,
+        Title = "Rename project",
+        Content = box,
+        PrimaryButtonText = "Rename",
+        CloseButtonText = "Cancel",
+        DefaultButton = ContentDialogButton.Primary,
+    };
+    return await dialog.ShowAsync() == ContentDialogResult.Primary ? box.Text.Trim() : null;
 }
 ```
 
-Prefer sliders, steppers, and pickers over typed values in a panel.
-
-A Spotlight-style panel, a corner card, a countdown, or a HUD is a
-different kind: borderless, non-activating, it closes when it loses focus
-and stays out of screen recordings. Recipe: mac-design patterns.md,
-"Quick-capture panel", and os-integrations recipes.md, "Non-activating
-panel".
-
-## Sheet
-
-Use for one short task that must finish or cancel before going on: a few
-fields, one screen, no navigation inside. On macOS the toolbar placements
-put the buttons at the bottom, bind Return to the confirm button, and bind
-Escape to Cancel.
-
-```swift
-.sheet(isPresented: $renaming) {
-    Form {
-        TextField("Name", text: $draft)
-    }
-    .formStyle(.grouped)
-    .frame(width: 360)
-    .navigationTitle("Rename Project")
-    .toolbar {
-        ToolbarItem(placement: .cancellationAction) {
-            Button("Cancel") { renaming = false }
-        }
-        ToolbarItem(placement: .confirmationAction) {
-            Button("Rename") { project.name = draft; renaming = false }
-                .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty)
-        }
-    }
-}
-```
-
-- A Done button always comes with Cancel, or with Back in a multi-step
-  sheet. Never show Cancel, Done, and Back together.
-- Open at a size that fits the content. Let people resize it when the
-  content would benefit (a long list, a preview).
-- Other windows of the app stay usable while the sheet is open.
-- People repeat the input and watch results? Use a panel instead.
-
-A sheet that grows a second screen, a sidebar, or a scroll of settings
-wants to be a window.
-
-## New window
-
-Use for a long or self-contained task, or something people keep open next
-to the main window: an editor, a large preview. Each window remembers its
-frame.
-
-```swift
-// In the App body
-WindowGroup("Item", for: PersistentIdentifier.self) { $id in
-    if let id { ItemEditor(id: id) }
-}
-.defaultSize(width: 640, height: 480)
-
-// In a view
-@Environment(\.openWindow) private var openWindow
-Button("Open in New Window") { openWindow(value: item.persistentModelID) }
-```
-
-## Sidebar page or detail
-
-A place people come back to (Inbox, Today, a project) is a sidebar page.
-One item of that list opens in the detail column or the inspector, not in a
-sheet. Add the page to the `SidebarItem` enum so snapshot mode visits it.
+- `XamlRoot` is required, and only one dialog can be open at a time.
+- `AutomationProperties.Name` is an attached property: set it with
+  `AutomationProperties.SetName(control, "...")` in code.
 
 ## Confirmation dialog
 
-Use only for a rare action that destroys data and cannot be undone. For
-undoable actions, act at once and offer Undo. The title asks the question,
-the button repeats the verb, and the system adds Cancel.
+Only for rare actions that cannot be undone, or that remove a lot. The
+title is a question with the verb, the button repeats the verb, and Cancel
+is the default so Enter is safe. Code: `windows-design`, patterns.md,
+"Confirm, then move to the Recycle Bin".
 
-When people chose the action on purpose (Empty Trash from a menu), the
-confirm button gets no destructive role, so Return confirms what they asked
-for. Use `role: .destructive` only for a destructive button people did not
-ask for, such as "Don't Save" when closing an edited document. [HIG Buttons]
+## New window
 
-```swift
-.confirmationDialog("Empty Trash?", isPresented: $confirmEmpty) {
-    Button("Empty Trash") { emptyTrash() }
-} message: {
-    Text("You can't undo this action.")
-}
+Use for a long or self-contained task people keep open beside the main
+window, like a document or a log viewer.
+
+```csharp
+var window = new Window { Title = "Scan log" };
+window.Content = new LogPage();
+window.Activate();
 ```
 
-## Alert
+A second window needs its own title bar setup and backdrop; copy them from
+`MainWindow`. Most features belong on a page instead.
 
-Use for a problem people must act on now. The title says what happened.
-The message, if any, says what to do.
+## Navigation page
 
-- Never at launch, never only to inform, and never for a common delete
-  that Undo covers.
-- The default button sits on the trailing side. Escape and Command-Period
-  cancel. Avoid "OK" except for a purely informational alert.
-- An alert that repeats for a task people do often gets a "Do not show
-  again" checkbox: `.dialogSuppressionToggle(isSuppressed: $skip)`.
-- The caution symbol only for a real risk of losing data, never for a
-  routine overwrite or Empty Trash.
+Use for a place people come back to: a list, a collection, a report. Add a
+case to `SidebarPage`, a `NavigationViewItem` in `MainWindow.xaml`, and a
+page. Snapshot mode then visits it.
 
-```swift
-.alert("Unable to Export", isPresented: $exportFailed) {
-    Button("Choose Another Folder") { chooseFolder() }
-    Button("Cancel", role: .cancel) {}
-} message: {
-    Text("The folder is read-only. Choose a folder you can write to.")
-}
+## Status instead of a dialog
+
+Information that needs no decision goes in an `InfoBar` at the top of the
+page. It does not block the work, and people close it when they are done.
+
+```xml
+<InfoBar x:Name="Status" IsOpen="True" Severity="Warning" IsClosable="True"
+         Title="12 folders could not be read" Message="They need administrator rights. Their sizes are left out." />
 ```
 
-## Status instead of an alert
-
-Information that needs no action goes where it applies. Offline, show the
-cached content and a quiet label, the way Mail does.
-
-```swift
-.safeAreaInset(edge: .bottom) {
-    if isOffline {
-        Label("Offline. Changes save when you reconnect.", systemImage: "wifi.slash")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .padding(8)
-    }
-}
-```
+Severities: `Informational`, `Success`, `Warning`, `Error`. An InfoBar can
+carry one action button, like Undo or Retry.
 
 ## Unsaved changes
 
-Ask before closing only when people would lose what they typed. Offer to
-keep it.
+Ask on close only when people would lose what they typed. Everything else
+saves as it goes.
 
-```swift
-Button("Cancel") {
-    if draft.isEmpty { dismiss() } else { confirmDiscard = true }
-}
-.confirmationDialog("Discard this note?", isPresented: $confirmDiscard) {
-    Button("Discard", role: .destructive) { dismiss() }
-    Button("Keep Editing", role: .cancel) {}
+```csharp
+public static void GuardClose(Window window, Func<bool> hasUnsavedText, Func<Task<bool>> askDiscard)
+{
+    window.AppWindow.Closing += async (AppWindow sender, AppWindowClosingEventArgs args) =>
+    {
+        if (!hasUnsavedText()) return;
+        args.Cancel = true;
+        if (await askDiscard()) { sender.Destroy(); }
+    };
 }
 ```
+
+The dialog asks "Save changes to "Q3 report"?" with "Save", "Don't save",
+and "Cancel".

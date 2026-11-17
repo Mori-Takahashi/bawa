@@ -18,8 +18,8 @@
   <Thickness x:Key="CardPadding">16,16,16,16</Thickness>
   <Thickness x:Key="RowPadding">12,8,12,8</Thickness>
 
-  <!-- Radii: Windows 11 control and overlay corners -->
-  <CornerRadius x:Key="CardRadius">8</CornerRadius>
+  <!-- Radii: 4 px for elements in a page (controls, cards), 8 px for windows, dialogs, and flyouts -->
+  <CornerRadius x:Key="CardRadius">4</CornerRadius>
   <x:Double x:Key="SettingsMaxWidth">1000</x:Double>
   <x:Double x:Key="EmptyStateIconSize">48</x:Double>
 

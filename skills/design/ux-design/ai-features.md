@@ -1,8 +1,8 @@
 # AI features
 
 Rules for a feature that uses a model: a summary, generated text, a
-suggestion, a smart sort. From the HIG page on generative AI (June 2026)
-and WWDC26-250. A model is sometimes wrong, so the design plans for that.
+suggestion, a smart sort. A model is sometimes wrong, so the design plans
+for that. Microsoft's guidance: learn.microsoft.com/windows/ai.
 
 ## Contents
 
@@ -15,8 +15,8 @@ and WWDC26-250. A model is sometimes wrong, so the design plans for that.
 
 ## Say where AI is used
 
-- Mark generated content, for example a `sparkles` symbol and the word
-  "Summary". Never pass it off as written by a person.
+- Mark generated content, for example an AI glyph from Segoe Fluent
+  Icons and the word "Summary". Never pass it off as written by a person.
 - Say what the feature does in plain words in its first view, not in a
   separate help page.
 
@@ -44,9 +44,13 @@ stream in when the format allows.
 
 ## Privacy and models
 
-- Prefer an on-device model (Apple's Foundation Models framework) for
-  personal data. It needs Apple Intelligence turned on; check
-  `SystemLanguageModel.default.availability` before showing the feature.
+- Prefer an on-device model for personal data. The Windows AI APIs
+  (Phi Silica, `Microsoft.Windows.AI.Text.LanguageModel`, included in the
+  Windows App SDK) run on Copilot+ PCs and on some PCs with a supported
+  GPU; check `LanguageModel.GetReadyState() == AIFeatureReadyState.Ready`
+  before showing the feature. They need the `systemAIModels` capability in
+  `Package.appxmanifest`, so an unpackaged app switches to MSIX first
+  (`new-windows-app`, "When to switch to an MSIX package").
 - When data goes to a server, say what goes, where, and why, before the
   first use.
 - Ask how the feature could be misused and who it could harm. Drop it when
@@ -54,7 +58,7 @@ stream in when the format allows.
 
 ## When it fails
 
-- The model is unavailable (off, unsupported Mac, no network): the feature
+- The model is unavailable (unsupported PC, turned off, no network): the feature
   explains why and the app still works without it. Every AI action has a
   manual path.
 - A refused or blocked request says so plainly and shows an example of an
