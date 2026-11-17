@@ -1,0 +1,27 @@
+<Window x:Class="__APP_NAME__.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Grid x:Name="Root">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="48" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <!-- The title bar: the app's own content, dragged like the system one. -->
+    <Grid x:Name="TitleBarArea" Grid.Row="0">
+      <TextBlock x:Name="TitleText" Margin="16,0,0,0" VerticalAlignment="Center"
+                 Style="{StaticResource CaptionTextBlockStyle}" />
+    </Grid>
+    <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed"
+                    PaneDisplayMode="Left" IsSettingsVisible="True">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="All" Tag="All" IsSelected="True">
+          <NavigationViewItem.Icon><FontIcon Glyph="&#xE8FD;" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Starred" Tag="Starred">
+          <NavigationViewItem.Icon><FontIcon Glyph="&#xE734;" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
+      <Frame x:Name="ContentFrame" />
+    </NavigationView>
+  </Grid>
+</Window>
